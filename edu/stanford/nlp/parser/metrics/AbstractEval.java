@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import org.apache.log4j.Logger;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
@@ -16,6 +17,8 @@ import edu.stanford.nlp.parser.KBestViterbiParser;
  * @author Dan Klein
  */
 public abstract class AbstractEval {
+
+  protected static Logger logger = Logger.getRootLogger();
 
   private static final boolean DEBUG = false;
 
@@ -150,22 +153,22 @@ public abstract class AbstractEval {
       exact += 1.0;
     }
     if (pw != null) {
-      pw.print(" P: " + ((int) (curPrecision * 10000)) / 100.0);
+      logger.trace(" P: " + ((int) (curPrecision * 10000)) / 100.0);
       if (runningAverages) {
-        pw.println(" (sent ave " + ((int) (precision * 10000 / num)) / 100.0 + ") (evalb " + ((int) (precision2 * 10000 / pnum2)) / 100.0 + ")");
+        logger.trace(" (sent ave " + ((int) (precision * 10000 / num)) / 100.0 + ") (evalb " + ((int) (precision2 * 10000 / pnum2)) / 100.0 + ")");
       }
-      pw.print(" R: " + ((int) (curRecall * 10000)) / 100.0);
+      logger.trace(" R: " + ((int) (curRecall * 10000)) / 100.0);
       if (runningAverages) {
-        pw.print(" (sent ave " + ((int) (recall * 10000 / num)) / 100.0 + ") (evalb " + ((int) (recall2 * 10000 / rnum2)) / 100.0 + ")");
+        logger.trace(" (sent ave " + ((int) (recall * 10000 / num)) / 100.0 + ") (evalb " + ((int) (recall2 * 10000 / rnum2)) / 100.0 + ")");
       }
-      pw.println();
+      logger.trace("");
       double cF1 = 2.0 / (rnum2 / recall2 + pnum2 / precision2);
-      pw.print(str + " F1: " + ((int) (curF1 * 10000)) / 100.0);
+      logger.trace(str + " F1: " + ((int) (curF1 * 10000)) / 100.0);
       if (runningAverages) {
-        pw.print(" (sent ave " + ((int) (10000 * f1 / num)) / 100.0 + ", evalb " + ((int) (10000 * cF1)) / 100.0 + ")   Exact: " + ((int) (10000 * exact / num)) / 100.0);
+        logger.trace(" (sent ave " + ((int) (10000 * f1 / num)) / 100.0 + ", evalb " + ((int) (10000 * cF1)) / 100.0 + ")   Exact: " + ((int) (10000 * exact / num)) / 100.0);
       }
-//      pw.println(" N: " + getNum());
-      pw.println(" N: " + num);
+//      logger.trace(" N: " + getNum());
+      logger.trace(" N: " + num);
     }
     /*
       Sentence s = guess.yield();
@@ -211,7 +214,7 @@ public abstract class AbstractEval {
     //System.out.println(" Precision: "+((int)(10000.0*prec))/100.0);
     //System.out.println(" Recall:    "+((int)(10000.0*rec))/100.0);
     //System.out.println(" F1:        "+((int)(10000.0*f))/100.0);
-    pw.println(str + " summary evalb: LP: " + ((int) (10000.0 * prec)) / 100.0 + " LR: " + ((int) (10000.0 * rec)) / 100.0 + " F1: " + ((int) (10000.0 * f)) / 100.0 + " Exact: " + ((int) (10000.0 * exact / num)) / 100.0 + " N: " + getNum());
+    logger.trace(str + " summary evalb: LP: " + ((int) (10000.0 * prec)) / 100.0 + " LR: " + ((int) (10000.0 * rec)) / 100.0 + " F1: " + ((int) (10000.0 * f)) / 100.0 + " Exact: " + ((int) (10000.0 * exact / num)) / 100.0 + " N: " + getNum());
     /*
     double prec = (num > 0.0 ? precision/num : 0.0);
     double rec = (num > 0.0 ? recall/num : 0.0);
@@ -277,16 +280,16 @@ public abstract class AbstractEval {
         num = rSize;
       }
       for (int i = 0; i < num; i++) {
-        pw.println(rules.get(i) + " " + c.getCount(rules.get(i)));
+        logger.trace(rules.get(i) + " " + c.getCount(rules.get(i)));
       }
     }
 
     @Override
     public void display(boolean verbose, PrintWriter pw) {
       //this.verbose = verbose;
-      pw.println("Most frequently underproposed rules:");
+      logger.trace("Most frequently underproposed rules:");
       display(under, (verbose ? 100 : 10), pw);
-      pw.println("Most frequently overproposed rules:");
+      logger.trace("Most frequently overproposed rules:");
       display(over, (verbose ? 100 : 10), pw);
     }
 
@@ -341,15 +344,15 @@ public abstract class AbstractEval {
       List<T> cats = new ArrayList<T>(c.keySet());
       Collections.sort(cats, Counters.toComparatorDescending(c));
       for (T ob : cats) {
-        pw.println(ob + " " + c.getCount(ob));
+        logger.trace(ob + " " + c.getCount(ob));
       }
     }
 
     @Override
     public void display(boolean verbose, PrintWriter pw) {
-      pw.println("Most frequently underproposed categories:");
+      logger.trace("Most frequently underproposed categories:");
       display(under, pw);
-      pw.println("Most frequently overproposed categories:");
+      logger.trace("Most frequently overproposed categories:");
       display(over, pw);
     }
 
@@ -377,18 +380,18 @@ public abstract class AbstractEval {
       totScore += score;
       n++;
       if (pw != null) {
-        pw.print(str + " score: " + nf.format(score));
+        logger.trace(str + " score: " + nf.format(score));
         if (runningAverages) {
-          pw.print(" average score: " + nf.format(totScore / n));
+          logger.trace(" average score: " + nf.format(totScore / n));
         }
-        pw.println();
+        logger.trace("");
       }
     }
 
     @Override
     public void display(boolean verbose, PrintWriter pw) {
       if (pw != null) {
-        pw.println(str + " total score: " + nf.format(totScore) +
+        logger.trace(str + " total score: " + nf.format(totScore) +
                 " average score: " + ((n == 0.0) ? "N/A": nf.format(totScore / n)));
       }
     }

@@ -400,7 +400,7 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
       String prefix = "BEGIN ";
 
       out.println(prefix + "OPTIONS");
-      op.writeData(out);
+      op.writeData();
       out.println();
       logger.trace(".");
 

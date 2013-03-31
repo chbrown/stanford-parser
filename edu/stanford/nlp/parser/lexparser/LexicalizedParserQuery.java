@@ -495,7 +495,7 @@ public class LexicalizedParserQuery {
    *          of the parser on the treebank.
    */
   public double testOnTreebank(Treebank testTreebank) {
-    System.err.println("Testing on treebank");
+    logger.trace("Testing on treebank");
     Timing treebankTotalTtimer = new Timing();
     TreePrint treePrint = getTreePrint();
     TreebankLangParserParams tlpParams = op.tlpParams;
