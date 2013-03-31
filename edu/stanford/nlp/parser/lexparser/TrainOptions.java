@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.CategoryWordTag;
 import java.util.Set;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -20,6 +21,8 @@ import java.io.Serializable;
  * @author Christopher Manning
  */
 public class TrainOptions implements Serializable {
+
+  protected static Logger logger = Logger.getRootLogger();
 
   public String trainTreeFile = null; // same for me -- Teg
 
@@ -217,7 +220,7 @@ public class TrainOptions implements Serializable {
    */
   public boolean ruleSmoothing = false;
   public double ruleSmoothingAlpha = 0.0;
-  
+
   /**
    * TODO wsg2011: This is the old grammar smoothing parameter that no
    * longer does anything in the parser. It should be removed.
@@ -239,7 +242,7 @@ public class TrainOptions implements Serializable {
   /** Where to use the basic or split tags in the dependency grammar */
   public boolean basicCategoryTagsInDependencyGrammar = false;
 
-  /** 
+  /**
    * A transformer to use on the training data before any other
    * processing step.  This is specified by using the -preTransformer
    * flag when training the parser.  A comma separated list of classes
@@ -291,7 +294,7 @@ public class TrainOptions implements Serializable {
   public int splitTrainingThreads = 1;
 
   public void display() {
-    System.err.println("Train parameters: smooth=" + smoothing + " PA=" + PA + " GPA=" + gPA + " selSplit=" + selectiveSplit + " (" + selectiveSplitCutOff + ((deleteSplitters != null) ? ("; deleting " + deleteSplitters): "") + ")" + " mUnary=" + markUnary + " mUnaryTags=" + markUnaryTags + " sPPT=" + splitPrePreT + " tagPA=" + tagPA + " tagSelSplit=" + tagSelectiveSplit + " (" + tagSelectiveSplitCutOff + ")" + " rightRec=" + rightRec + " leftRec=" + leftRec + " collinsPunc=" + collinsPunc + " markov=" + markovFactor + " mOrd=" + markovOrder + " hSelSplit=" + hSelSplit + " (" + HSEL_CUT + ")" + " compactGrammar=" + compactGrammar() + " postPA=" + postPA + " postGPA=" + postGPA + " selPSplit=" + selectivePostSplit + " (" + selectivePostSplitCutOff + ")" + " tagSelPSplit=" + tagSelectivePostSplit + " (" + tagSelectivePostSplitCutOff + ")" + " postSplitWithBase=" + postSplitWithBaseCategory + " fractionBeforeUnseenCounting=" + fractionBeforeUnseenCounting + " openClassTypesThreshold=" + openClassTypesThreshold + " preTransformer=" + preTransformer + " taggedFiles=" + taggedFiles + " predictSplits=" + predictSplits + " splitCount=" + splitCount + " splitRecombineRate=" + splitRecombineRate + " simpleBinarizedLabels=" + simpleBinarizedLabels + " noRebinarization=" + noRebinarization + " splitTrainingThreads=" + splitTrainingThreads);
+    logger.trace("Train parameters: smooth=" + smoothing + " PA=" + PA + " GPA=" + gPA + " selSplit=" + selectiveSplit + " (" + selectiveSplitCutOff + ((deleteSplitters != null) ? ("; deleting " + deleteSplitters): "") + ")" + " mUnary=" + markUnary + " mUnaryTags=" + markUnaryTags + " sPPT=" + splitPrePreT + " tagPA=" + tagPA + " tagSelSplit=" + tagSelectiveSplit + " (" + tagSelectiveSplitCutOff + ")" + " rightRec=" + rightRec + " leftRec=" + leftRec + " collinsPunc=" + collinsPunc + " markov=" + markovFactor + " mOrd=" + markovOrder + " hSelSplit=" + hSelSplit + " (" + HSEL_CUT + ")" + " compactGrammar=" + compactGrammar() + " postPA=" + postPA + " postGPA=" + postGPA + " selPSplit=" + selectivePostSplit + " (" + selectivePostSplitCutOff + ")" + " tagSelPSplit=" + tagSelectivePostSplit + " (" + tagSelectivePostSplitCutOff + ")" + " postSplitWithBase=" + postSplitWithBaseCategory + " fractionBeforeUnseenCounting=" + fractionBeforeUnseenCounting + " openClassTypesThreshold=" + openClassTypesThreshold + " preTransformer=" + preTransformer + " taggedFiles=" + taggedFiles + " predictSplits=" + predictSplits + " splitCount=" + splitCount + " splitRecombineRate=" + splitRecombineRate + " simpleBinarizedLabels=" + simpleBinarizedLabels + " noRebinarization=" + noRebinarization + " splitTrainingThreads=" + splitTrainingThreads);
   }
 
   public static void printTrainTree(PrintWriter pw, String message, Tree t) {
@@ -303,7 +306,7 @@ public class TrainOptions implements Serializable {
     }
     if (message != null && pw == null) {
       // hard coded to not print message if using file output!
-      myPW.println(message);
+      logger.trace(message);
     }
     // TODO FIXME:  wtf is this shit
     boolean previousState = CategoryWordTag.printWordTag;

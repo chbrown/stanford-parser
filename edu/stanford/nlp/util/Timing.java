@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import org.apache.log4j.Logger;
+
 
 /**
  * A class for measuring how long things take.  For backward
@@ -14,6 +16,8 @@ import java.text.DecimalFormat;
  * @author Bill MacCartney
  */
 public class Timing {
+
+  protected static Logger logger = Logger.getRootLogger();
 
   /**
    * Stores the time at which the timer was started.
@@ -278,7 +282,7 @@ public class Timing {
    */
   public static void endDoing() {
     long elapsed = System.currentTimeMillis() - startTime;
-    System.err.println("done [" + nf.format(((double) elapsed) / 1000) + 
+    System.err.println("done [" + nf.format(((double) elapsed) / 1000) +
                        " sec].");
   }
 
@@ -324,7 +328,9 @@ public class Timing {
    * @return Number of milliseconds elapsed
    */
   public static long tick(String str) {
-    return tick(str, System.err);
+    long elapsed = tick();
+    logger.trace(str + " Time elapsed: " + (elapsed) + " ms");
+    return elapsed;
   }
 
   // import java.util.Calendar;

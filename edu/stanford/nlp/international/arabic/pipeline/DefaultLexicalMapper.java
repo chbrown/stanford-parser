@@ -35,7 +35,7 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
   private final Pattern bwQuran = Pattern.compile("`");
   private final Pattern bwNullAnaphoraMarker = Pattern.compile("\\[nll\\]");
 
-  public final Pattern latinPunc = Pattern.compile("([\u0021-\u002F\u003A-\u0040\\u005B\u005C\\u005D\u005E-\u0060\u007B-\u007E\u00A1-\u00BF\u2010-\u2027\u2030-\u205E\u20A0-\u20B5])+");
+  public final Pattern latinPunc = Pattern.compile("([\u0021-\u002F\u003A-\u0040\u005B\u005C\u005C\u005D\u005E-\u0060\u007B-\u007E\u00A1-\u00BF\u2010-\u2027\u2030-\u205E\u20A0-\u20B5])+");
   public final Pattern arabicPunc = Pattern.compile("([\u00AB\u00BB\u0609-\u060D\u061B-\u061F\u066A\u066C-\u066D\u06D4])+");
 
   public final Pattern arabicDigit = Pattern.compile("([\u06F0-\u06F9\u0660-\u0669])+");
@@ -69,20 +69,20 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
   private final String parentTagString = "PUNC LATIN -NONE-";
   private final Set<String> parentTagsToEscape;
 
-  private final String utf8CliticString = "ل ف و ما ه ها هم هن نا كم تن تم ى ي هما ك ب م"; 
+  private final String utf8CliticString = "ل ف و ما ه ها هم هن نا كم تن تم ى ي هما ك ب م";
 //  private final Set<String> utf8Clitics;
   private final Set<String> bwClitics;
 
   public DefaultLexicalMapper() {
-    parentTagsToEscape = 
+    parentTagsToEscape =
       Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(parentTagString.split("\\s+"))));
-   
-//    utf8Clitics = 
+
+//    utf8Clitics =
 //      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(utf8CliticString.split("\\s+"))));
 
     Buckwalter bw = new Buckwalter(true);
     String bwString = bw.apply(utf8CliticString);
-    bwClitics = 
+    bwClitics =
       Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(bwString.split("\\s+"))));
   }
 
@@ -165,7 +165,7 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
         String strippedElem = cliticMarker.replaceAll("");
         if(strippedElem.length() > 0)
           element = bwClitics.contains(strippedElem) ? element : strippedElem;
-      } 
+      }
 
     } else if (element.length() > 1 && !ATBTreeUtils.reservedWords.contains(element)) {
       Matcher rmCliticMarker = segmentationMarker.matcher(element);

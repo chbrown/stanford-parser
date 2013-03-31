@@ -5,6 +5,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 
 import java.io.Serializable;
 import java.util.Properties;
+import org.apache.log4j.Logger;
 
 /**
  * Options to the parser which affect performance only at testing (parsing)
@@ -19,6 +20,8 @@ import java.util.Properties;
  * @author Dan Klein
  */
 public class TestOptions implements Serializable {
+
+  protected static Logger logger = Logger.getRootLogger();
 
   static final String DEFAULT_PRE_TAGGER =
      "/u/nlp/data/pos-tagger/wsj3t0-18-bidirectional/bidirectional-wsj-0-18.tagger";
@@ -278,7 +281,7 @@ public class TestOptions implements Serializable {
 
   public void display() {
     String str = "Test parameters maxLength=" + maxLength + " preTag=" + preTag + " outputFormat=" + outputFormat + " outputFormatOptions=" + outputFormatOptions + " printAllBestParses=" + printAllBestParses;
-    System.err.println(str);
+    logger.trace(str);
   }
 
   private static final long serialVersionUID = 7256526346598L;

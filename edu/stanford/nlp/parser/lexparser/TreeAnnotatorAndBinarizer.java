@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.lexparser;
 import java.util.*;
 import java.io.FileFilter;
 import java.io.PrintWriter;
+import org.apache.log4j.Logger;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.NumberRangeFileFilter;
@@ -15,7 +16,6 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Triple;
 
-
 public class TreeAnnotatorAndBinarizer implements TreeTransformer {
 
   private TreeFactory tf;
@@ -27,6 +27,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
   private ClassicCounter<Tree> annotatedRuleCounts;
   private ClassicCounter<String> annotatedStateCounts;
   private TrainOptions trainOptions;
+  protected static Logger logger = Logger.getRootLogger();
 
   public TreeAnnotatorAndBinarizer(TreebankLangParserParams tlpParams, boolean forceCNF, boolean insideFactor, boolean doSubcategorization, Options op) {
     this(tlpParams.headFinder(), tlpParams.headFinder(), tlpParams, forceCNF, insideFactor, doSubcategorization, op);
@@ -227,7 +228,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
       trainTransformer.addTransformer(collinsPuncTransformer);
     }
 
-    System.err.print("Binarizing trees...");
+    logger.trace("Binarizing trees...");
     TreeAnnotatorAndBinarizer binarizer;
     if (!op.trainOptions.leftToRight) {
       binarizer = new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), !op.trainOptions.predictSplits, op);

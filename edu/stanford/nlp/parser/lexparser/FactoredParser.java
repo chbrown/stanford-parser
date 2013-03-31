@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.ling.HasWord;
@@ -66,6 +67,8 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Philip Resnik and Dan Zeman (n good parses)
  */
 public class FactoredParser {
+
+  protected static Logger logger = Logger.getRootLogger();
 
 /* some documentation for Roger's convenience
  * {pcfg,dep,combo}{PE,DE,TE} are precision/dep/tagging evals for the models

@@ -9,6 +9,8 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
+import org.apache.log4j.Logger;
+
 
 
 /**
@@ -23,6 +25,8 @@ import java.util.*;
  * @author John Bauer
  */
 public class Options implements Serializable {
+
+  protected static Logger logger = Logger.getRootLogger();
 
   public Options() {
     this(new EnglishTreebankParserParams());
@@ -992,15 +996,14 @@ public class Options implements Serializable {
 
   public void display() {
 //    try {
-      System.err.println("Options parameters:");
-      writeData(new PrintWriter(System.err));
+      logger.trace("Options parameters:");
+      writeData();
 /*    } catch (IOException e) {
       e.printStackTrace();
     }*/
   }
 
-  public void writeData(Writer w) {//throws IOException {
-    PrintWriter out = new PrintWriter(w);
+  public void writeData() {//throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append(lexOptions.toString());
     sb.append("parserParams ").append(tlpParams.getClass().getName()).append("\n");
@@ -1014,8 +1017,7 @@ public class Options implements Serializable {
     sb.append("coarseDistance ").append(coarseDistance).append("\n");
     sb.append("dcTags ").append(dcTags).append("\n");
     sb.append("nPrune ").append(nodePrune).append("\n");
-    out.print(sb.toString());
-    out.flush();
+    logger.trace(sb.toString());
   }
 
 

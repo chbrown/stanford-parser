@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.apache.log4j.Logger;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -95,6 +96,8 @@ public class LexicalizedParserQuery {
   private List<String> originalWords = null;
   /** These are the original lemmas */
   private List<String> originalLemmas = null;
+
+  protected static Logger logger = Logger.getRootLogger();
 
   /**
    * The tagger optionally used before parsing.
@@ -317,7 +320,7 @@ public class LexicalizedParserQuery {
       String lemma = lemmasIterator.next();
       if ((leaf.label() instanceof HasLemma) && (lemma != null)) {
         ((HasLemma) leaf.label()).setLemma(lemma);
-      }      
+      }
     }
   }
 
@@ -500,8 +503,8 @@ public class LexicalizedParserQuery {
     PrintWriter pwOut = tlpParams.pw();
     PrintWriter pwErr = tlpParams.pw(System.err);
     if (op.testOptions.verbose) {
-      pwErr.print("Testing ");
-      pwErr.println(testTreebank.textualSummary(tlp));
+      logger.trace("Testing ");
+      logger.trace(testTreebank.textualSummary(tlp));
     }
     if (op.testOptions.evalb) {
       EvalbFormatWriter.initEVALBfiles(tlpParams);
@@ -537,7 +540,7 @@ public class LexicalizedParserQuery {
     // subcategoryStripper = tlpParams.subcategoryStripper(); // NOT NEEDED. THIS WAS DONE ON CLASS INITIALIZATION
 
     List<BestOfTopKEval> topKEvals = new ArrayList<BestOfTopKEval>();
-    
+
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgTopK"))) {
       topKEvals.add(new BestOfTopKEval(new Evalb("pcfg top k comparisons", false), new Evalb("pcfg top k LP/LR", runningAverages)));
     }
@@ -649,7 +652,7 @@ public class LexicalizedParserQuery {
 
       timer.start();
 
-      pwErr.println("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
+      logger.trace("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
       Tree tree = null;
       List<ScoredObject<Tree>> kbestPCFGTrees = null;
       int kbestPCFG = 0;
@@ -661,30 +664,30 @@ public class LexicalizedParserQuery {
       }
       try {
         if ( ! parse(sentence)) {
-          pwErr.print("Sentence couldn't be parsed by grammar.");
+          logger.trace("Sentence couldn't be parsed by grammar.");
           if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
-            pwErr.println("... falling back to PCFG parse.");
+            logger.trace("... falling back to PCFG parse.");
             tree = getBestPCFGParse();
             if (kbestPCFG > 0) {
               kbestPCFGTrees = getKBestPCFGParses(kbestPCFG);
             }
           } else {
-            pwErr.println();
+            logger.trace("");
           }
         } else {
           tree = getBestParse();
           if (kbestPCFG > 0) {
             kbestPCFGTrees = getKBestPCFGParses(kbestPCFG);
           }
-          if (bparser != null) pwErr.println("FactoredParser parse score is " + bparser.getBestScore());
+          if (bparser != null) logger.trace("FactoredParser parse score is " + bparser.getBestScore());
         }
 
       } catch (OutOfMemoryError e) {
         if (op.testOptions.maxLength != -0xDEADBEEF) {
           // this means they explicitly asked for a length they cannot handle.
           // Throw exception.  Avoid string concatenation before throw it.
-          pwErr.print("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
-          pwErr.println(op.testOptions.maxLength);
+          logger.error("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
+          logger.error(op.testOptions.maxLength);
           throw e;
 
         } else {
@@ -698,23 +701,23 @@ public class LexicalizedParserQuery {
               if (dparser.hasParse()) {
                 what = "factored";
               }
-              pwErr.println("Sentence too long for " + what + " parser.  Falling back to PCFG parse...");
+              logger.trace("Sentence too long for " + what + " parser.  Falling back to PCFG parse...");
               tree = getBestPCFGParse();
               if (kbestPCFG > 0) {
                 kbestPCFGTrees = getKBestPCFGParses(kbestPCFG);
               }
             } catch (OutOfMemoryError oome) {
               oome.printStackTrace();
-              pwErr.println("No memory to gather PCFG parse. Skipping...");
+              logger.trace("No memory to gather PCFG parse. Skipping...");
               pparser.nudgeDownArraySize();
             }
           } else {
-            pwErr.println("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
+            logger.trace("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
           }
-          pwErr.println();
+          logger.trace("");
         }
       } catch (UnsupportedOperationException uoe) {
-        pwErr.println("Sentence too long (or zero words).");
+        logger.trace("Sentence too long (or zero words).");
         if(pwo != null) {
           pwo.println("(())");
         }
@@ -730,7 +733,8 @@ public class LexicalizedParserQuery {
         }
         treePrint.printTree(ot, pwOut);
       } else {
-        treePrint.printTree(tree, pwOut);
+        // TODO: send this to trace
+        // treePrint.printTree(tree, pwOut);
       }
 
       // **OUTPUT**
@@ -832,24 +836,24 @@ public class LexicalizedParserQuery {
 
         //Can't do evaluation in these two cases
         if (transGoldTree == null) {
-          pwErr.println("Couldn't transform gold tree for evaluation, skipping eval. Gold tree was:");
+          logger.trace("Couldn't transform gold tree for evaluation, skipping eval. Gold tree was:");
           goldTree.pennPrint(pwErr);
           numSkippedEvals++;
           continue;
 
         } else if (treeFact == null) {
-          pwErr.println("Couldn't transform hypothesis tree for evaluation, skipping eval. Tree was:");
+          logger.trace("Couldn't transform hypothesis tree for evaluation, skipping eval. Tree was:");
           tree.pennPrint(pwErr);
           numSkippedEvals++;
           continue;
-        
+
         } else if(treeFact.yield().size() != transGoldTree.yield().size()) {
           List<Label> fYield = treeFact.yield();
           List<Label> gYield = transGoldTree.yield();
-          pwErr.println("WARNING: Evaluation could not be performed due to guess/gold yield mismatch.");
-          pwErr.println("  sizes: g: " + gYield.size() + " p: " + fYield.size());
-          pwErr.println("  g: " + Sentence.listToString(gYield, true));
-          pwErr.println("  p: " + Sentence.listToString(gYield, true));
+          logger.trace("WARNING: Evaluation could not be performed due to guess/gold yield mismatch.");
+          logger.trace("  sizes: g: " + gYield.size() + " p: " + fYield.size());
+          logger.trace("  g: " + Sentence.listToString(gYield, true));
+          logger.trace("  p: " + Sentence.listToString(gYield, true));
           numSkippedEvals++;
           continue;
         }
@@ -920,7 +924,7 @@ public class LexicalizedParserQuery {
             Tree undoneTree = debinarizer.transformTree(treeDep);
             undoneTree = subcategoryStripper.transformTree(undoneTree);
             restoreOriginalWords(undoneTree);
-            // pwErr.println("subcategoryStripped tree: " + undoneTree.toStructureDebugString());
+            // logger.trace("subcategoryStripped tree: " + undoneTree.toStructureDebugString());
             depTA.evaluate(undoneTree, goldTree, pwErr);
           }
           if (depLL != null && dparser != null) {
@@ -959,7 +963,7 @@ public class LexicalizedParserQuery {
           EvalbFormatWriter.writeEVALBline(treeFact, transGoldTree);
         }
       }
-      pwErr.println();
+      logger.trace("");
     } // for tree iterator
 
     //Done parsing...print the results of the evaluations
@@ -973,7 +977,7 @@ public class LexicalizedParserQuery {
     if(numSkippedEvals != 0) {
       pwOut.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
     }
-    if (summary) {
+    if (summary && op.testOptions.verbose) {
       if (pcfgLB != null) pcfgLB.display(false, pwErr);
       if (pcfgLA != null) pcfgLA.display(false, pwErr);
       if (pcfgCB != null) pcfgCB.display(false, pwErr);
@@ -999,7 +1003,7 @@ public class LexicalizedParserQuery {
     if (pcfgCUO != null) pcfgCUO.display(true, pwErr);
     if (tsv) {
       NumberFormat nf = new DecimalFormat("0.00");
-      pwErr.println("factF1\tfactDA\tfactEx\tpcfgF1\tdepDA\tfactTA\tnum");
+      logger.trace("factF1\tfactDA\tfactEx\tpcfgF1\tdepDA\tfactTA\tnum");
       if (factLB != null) pwErr.print(nf.format(factLB.getEvalbF1Percent()));
       pwErr.print("\t");
       if (dparser != null && factDA != null) pwErr.print(nf.format(factDA.getEvalbF1Percent()));
@@ -1013,7 +1017,7 @@ public class LexicalizedParserQuery {
       if (pparser != null && factTA != null) pwErr.print(nf.format(factTA.getEvalbF1Percent()));
       pwErr.print("\t");
       if (factLB != null) pwErr.print(factLB.getNum());
-      pwErr.println();
+      logger.trace("");
     }
 
     double f1 = 0.0;
@@ -1050,9 +1054,9 @@ public class LexicalizedParserQuery {
 
     if (op.testOptions.verbose) {
       if(tokenizerFactory != null)
-        pwErr.println("parseFiles: Tokenizer factory is: " + tokenizerFactory);
-      pwErr.println("Sentence final words are: " + Arrays.asList(tlp.sentenceFinalPunctuationWords()));
-      pwErr.println("File encoding is: " + op.tlpParams.getInputEncoding());
+        logger.trace("parseFiles: Tokenizer factory is: " + tokenizerFactory);
+      logger.trace("Sentence final words are: " + Arrays.asList(tlp.sentenceFinalPunctuationWords()));
+      logger.trace("File encoding is: " + op.tlpParams.getInputEncoding());
     }
 
     // evaluation setup
@@ -1133,14 +1137,14 @@ public class LexicalizedParserQuery {
       treePrint.printHeader(pwo, op.tlpParams.getOutputEncoding());
 
 
-      pwErr.println("Parsing file: " + filename);
+      logger.trace("Parsing file: " + filename);
       int num = 0;
       for (List<HasWord> sentence : documentPreprocessor) {
         num++;
         numSents++;
         int len = sentence.size();
         numWords += len;
-        pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
+        logger.trace("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
 
         Tree ansTree = null;
         try {
@@ -1149,11 +1153,11 @@ public class LexicalizedParserQuery {
           if ( ! parse(sentence)) {
             pwErr.print("Sentence couldn't be parsed by grammar.");
             if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
-              pwErr.println("... falling back to PCFG parse.");
+              logger.trace("... falling back to PCFG parse.");
               ansTree = getBestPCFGParse();
               numFallback++;
             } else {
-              pwErr.println();
+              logger.trace("");
               numUnparsable++;
             }
           } else {
@@ -1172,7 +1176,7 @@ public class LexicalizedParserQuery {
         } catch (OutOfMemoryError e) {
           if (op.testOptions.maxLength != -0xDEADBEEF) {
             // this means they explicitly asked for a length they cannot handle. Throw exception.
-            pwErr.println("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH " + op.testOptions.maxLength);
+            logger.trace("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH " + op.testOptions.maxLength);
             pwo.println("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH " + op.testOptions.maxLength);
             throw e;
           } else {
@@ -1186,24 +1190,24 @@ public class LexicalizedParserQuery {
                 if (dparser.hasParse()) {
                   what = "factored";
                 }
-                pwErr.println("Sentence too long for " + what + " parser.  Falling back to PCFG parse...");
+                logger.trace("Sentence too long for " + what + " parser.  Falling back to PCFG parse...");
                 ansTree = getBestPCFGParse();
                 numFallback++;
               } catch (OutOfMemoryError oome) {
                 oome.printStackTrace();
                 numNoMemory++;
-                pwErr.println("No memory to gather PCFG parse. Skipping...");
+                logger.trace("No memory to gather PCFG parse. Skipping...");
                 pwo.println("Sentence skipped:  no PCFG fallback.");
                 pparser.nudgeDownArraySize();
               }
             } else {
-              pwErr.println("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
+              logger.trace("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
               pwo.println("Sentence skipped: no PCFG fallback.");
               numSkipped++;
             }
           }
         } catch (UnsupportedOperationException uoe) {
-          pwErr.println("Sentence too long (or zero words).");
+          logger.trace("Sentence too long (or zero words).");
           //pwo.println("Sentence skipped: too long (or zero words).");
           numWords -= len;
           numSkipped++;
@@ -1211,7 +1215,7 @@ public class LexicalizedParserQuery {
         try {
           treePrint.printTree(ansTree, Integer.toString(num), pwo);
         } catch (RuntimeException re) {
-          pwErr.println("TreePrint.printTree skipped: out of memory (or other error)");
+          logger.trace("TreePrint.printTree skipped: out of memory (or other error)");
           re.printStackTrace();
           numNoMemory++;
           try {
@@ -1235,7 +1239,7 @@ public class LexicalizedParserQuery {
       treePrint.printFooter(pwo);
       if (op.testOptions.writeOutputFiles) pwo.close();
 
-      pwErr.println("Parsed file: " + filename + " [" + num + " sentences].");
+      logger.trace("Parsed file: " + filename + " [" + num + " sentences].");
     }
 
     long millis = timer.stop();
@@ -1252,22 +1256,22 @@ public class LexicalizedParserQuery {
     double wordspersec = numWords / (((double) millis) / 1000);
     double sentspersec = numSents / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
-    pwErr.println("Parsed " + numWords + " words in " + numSents +
+    logger.trace("Parsed " + numWords + " words in " + numSents +
         " sentences (" + nf.format(wordspersec) + " wds/sec; " +
         nf.format(sentspersec) + " sents/sec).");
     if (numFallback > 0) {
-      pwErr.println("  " + numFallback + " sentences were parsed by fallback to PCFG.");
+      logger.trace("  " + numFallback + " sentences were parsed by fallback to PCFG.");
     }
     if (numUnparsable > 0 || numNoMemory > 0 || numSkipped > 0) {
-      pwErr.println("  " + (numUnparsable + numNoMemory + numSkipped) + " sentences were not parsed:");
+      logger.trace("  " + (numUnparsable + numNoMemory + numSkipped) + " sentences were not parsed:");
       if (numUnparsable > 0) {
-        pwErr.println("    " + numUnparsable + " were not parsable with non-zero probability.");
+        logger.trace("    " + numUnparsable + " were not parsable with non-zero probability.");
       }
       if (numNoMemory > 0) {
-        pwErr.println("    " + numNoMemory + " were skipped because of insufficient memory.");
+        logger.trace("    " + numNoMemory + " were skipped because of insufficient memory.");
       }
       if (numSkipped > 0) {
-        pwErr.println("    " + numSkipped + " were skipped as length 0 or greater than " + op.testOptions.maxLength);
+        logger.trace("    " + numSkipped + " were skipped as length 0 or greater than " + op.testOptions.maxLength);
       }
     }
   } // end parseFiles
