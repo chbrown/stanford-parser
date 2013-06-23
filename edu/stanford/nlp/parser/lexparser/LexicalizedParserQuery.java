@@ -671,8 +671,6 @@ public class LexicalizedParserQuery {
             if (kbestPCFG > 0) {
               kbestPCFGTrees = getKBestPCFGParses(kbestPCFG);
             }
-          } else {
-            logger.trace("");
           }
         } else {
           tree = getBestParse();
@@ -714,7 +712,6 @@ public class LexicalizedParserQuery {
           } else {
             logger.trace("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
           }
-          logger.trace("");
         }
       } catch (UnsupportedOperationException uoe) {
         logger.trace("Sentence too long (or zero words).");
@@ -963,7 +960,6 @@ public class LexicalizedParserQuery {
           EvalbFormatWriter.writeEVALBline(treeFact, transGoldTree);
         }
       }
-      logger.trace("");
     } // for tree iterator
 
     //Done parsing...print the results of the evaluations
@@ -1017,7 +1013,6 @@ public class LexicalizedParserQuery {
       if (pparser != null && factTA != null) pwErr.print(nf.format(factTA.getEvalbF1Percent()));
       pwErr.print("\t");
       if (factLB != null) pwErr.print(factLB.getNum());
-      logger.trace("");
     }
 
     double f1 = 0.0;
@@ -1157,7 +1152,6 @@ public class LexicalizedParserQuery {
               ansTree = getBestPCFGParse();
               numFallback++;
             } else {
-              logger.trace("");
               numUnparsable++;
             }
           } else {

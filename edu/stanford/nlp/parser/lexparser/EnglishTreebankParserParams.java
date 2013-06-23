@@ -1179,8 +1179,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
         }
         // all the rest under VP, PP, ADJP, ADVP, etc. are basic case
       } else if (englishTrain.splitIN >= 4 && englishTrain.splitIN <= 5 && baseCat.equals("IN")) {
-        System.out.println("grandParentStr.charAt(0)" + grandParentStr.charAt(0));
-        System.out.println("parentStr.charAt(0)" + parentStr.charAt(0));
+        // System.out.println("grandParentStr.charAt(0)" + grandParentStr.charAt(0));
+        // System.out.println("parentStr.charAt(0)" + parentStr.charAt(0));
         if (grandParentStr.charAt(0) == 'N' && (parentStr.charAt(0) == 'P' || parentStr.charAt(0) == 'A')) {
           // noun postmodifier PP (or so-called ADVP like "outside India")
           cat = cat + "-N";

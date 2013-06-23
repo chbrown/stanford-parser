@@ -161,13 +161,11 @@ public abstract class AbstractEval {
       if (runningAverages) {
         logger.trace(" (sent ave " + ((int) (recall * 10000 / num)) / 100.0 + ") (evalb " + ((int) (recall2 * 10000 / rnum2)) / 100.0 + ")");
       }
-      logger.trace("");
       double cF1 = 2.0 / (rnum2 / recall2 + pnum2 / precision2);
       logger.trace(str + " F1: " + ((int) (curF1 * 10000)) / 100.0);
       if (runningAverages) {
         logger.trace(" (sent ave " + ((int) (10000 * f1 / num)) / 100.0 + ", evalb " + ((int) (10000 * cF1)) / 100.0 + ")   Exact: " + ((int) (10000 * exact / num)) / 100.0);
       }
-//      logger.trace(" N: " + getNum());
       logger.trace(" N: " + num);
     }
     /*
@@ -384,7 +382,6 @@ public abstract class AbstractEval {
         if (runningAverages) {
           logger.trace(" average score: " + nf.format(totScore / n));
         }
-        logger.trace("");
       }
     }
 

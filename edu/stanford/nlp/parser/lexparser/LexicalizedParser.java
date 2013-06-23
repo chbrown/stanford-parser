@@ -538,18 +538,18 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
       return pd;
     } catch (InvalidClassException ice) {
       // For this, it's not a good idea to continue and try it as a text file!
-      logger.trace("");   // as in middle of line from above message
+      // logger.trace("");   // as in middle of line from above message
       throw new RuntimeException("Invalid class in file: " + serializedFileOrUrl, ice);
     } catch (FileNotFoundException fnfe) {
       // For this, it's not a good idea to continue and try it as a text file!
-      logger.trace("");   // as in middle of line from above message
+      // logger.trace("");   // as in middle of line from above message
       throw new RuntimeException("File not found: " + serializedFileOrUrl, fnfe);
     } catch (StreamCorruptedException sce) {
       // suppress error message, on the assumption that we've really got
       // a text grammar, and that'll be tried next
-      logger.trace("");
+      // logger.trace("");
     } catch (Exception e) {
-      logger.trace("");   // as in middle of line from above message
+      // logger.trace("");   // as in middle of line from above message
       e.printStackTrace();
     }
     return null;
@@ -795,7 +795,6 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     for (String arg : args) {
       logger.trace(' ' + arg);
     }
-    logger.trace("");
   }
 
   /**
